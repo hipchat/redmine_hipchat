@@ -1,0 +1,5 @@
+en:
+  hipchat_settings_header: HipChat Plugin Configuration
+  hipchat_settings_label_room_id: Room ID
+  hipchat_settings_label_auth_token: Room token
+  hipchat_settings_label_notify: Notify
