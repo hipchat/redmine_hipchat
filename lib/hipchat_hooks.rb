@@ -2,7 +2,7 @@ class NotificationHook < Redmine::Hook::Listener
 
   def controller_issues_new_after_save(context={})
     issue = context[:issue]
-    author = CGI::escapeHTML(issue.author.name)
+    author = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
     subject = CGI::escapeHTML(issue.subject)
     url = get_url issue.id
@@ -14,7 +14,7 @@ class NotificationHook < Redmine::Hook::Listener
   def controller_issues_edit_after_save(context={})
     issue = context[:issue]
 
-    author = CGI::escapeHTML(issue.author.name)
+    author = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
     subject = CGI::escapeHTML(issue.subject)
     url = get_url issue.id
