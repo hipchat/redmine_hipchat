@@ -3,11 +3,12 @@ class NotificationHook < Redmine::Hook::Listener
   def controller_issues_new_after_save(context={})
     issue   = context[:issue]
     return true unless Setting.plugin_hipchat[:projects].include?(issue.project_id.to_s)
+    project = issue.project
     author  = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
     subject = CGI::escapeHTML(issue.subject)
     url     = get_url issue
-    text    = "#{author} reported #{tracker} <a href=\"#{url}\">##{issue.id}</a>: #{subject}"
+    text    = "#{author} reported #{project.name} #{tracker} <a href=\"#{url}\">##{issue.id}</a>: #{subject}"
 
     send_message text
   end
@@ -15,12 +16,12 @@ class NotificationHook < Redmine::Hook::Listener
   def controller_issues_edit_after_save(context={})
     issue   = context[:issue]
     return true unless Setting.plugin_hipchat[:projects].include?(issue.project_id.to_s)
-
+    project = issue.project
     author  = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
     subject = CGI::escapeHTML(issue.subject)
     url     = get_url issue
-    text    = "#{author} updated #{tracker} <a href=\"#{url}\">##{issue.id}</a>: #{subject}"
+    text    = "#{author} updated #{project.name} #{tracker} <a href=\"#{url}\">##{issue.id}</a>: #{subject}"
 
     send_message text
   end
