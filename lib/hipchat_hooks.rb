@@ -20,8 +20,10 @@ class NotificationHook < Redmine::Hook::Listener
     author  = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
     subject = CGI::escapeHTML(issue.subject)
+    comment = CGI::escapeHTML(context[:journal].notes)
     url     = get_url issue
     text    = "#{author} updated #{project.name} #{tracker} <a href=\"#{url}\">##{issue.id}</a>: #{subject}"
+    text   += ": <i>#{truncate(comment)}</i>" unless comment.blank?
 
     send_message text
   end
@@ -76,6 +78,12 @@ private
     rescue Net::HTTPBadResponse => e
       RAILS_DEFAULT_LOGGER.error "Error hitting HipChat API: #{e}"
     end
+  end
+
+  def truncate(text, length = 20, end_string = '…')
+    return unless text
+    words = text.split()
+    words[0..(length-1)].join(' ') + (words.length > length ? end_string : '')
   end
 
 end
