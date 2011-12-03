@@ -13,5 +13,5 @@ Redmine::Plugin.register :hipchat do
                          :room_id => "",
                          :auth_token => "",
                        },
-           :partial => 'shared/settings'
+           :partial => 'hipchat/settings'
 end
