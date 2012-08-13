@@ -2,7 +2,7 @@ class NotificationHook < Redmine::Hook::Listener
 
   def controller_issues_new_after_save(context={})
     issue   = context[:issue]
-    return true unless Setting.plugin_hipchat[:projects].include?(issue.project_id.to_s)
+    return true unless Setting.plugin_redmine_hipchat[:projects].include?(issue.project_id.to_s)
     project = issue.project
     author  = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
@@ -15,7 +15,7 @@ class NotificationHook < Redmine::Hook::Listener
 
   def controller_issues_edit_after_save(context={})
     issue   = context[:issue]
-    return true unless Setting.plugin_hipchat[:projects].include?(issue.project_id.to_s)
+    return true unless Setting.plugin_redmine_hipchat[:projects].include?(issue.project_id.to_s)
     project = issue.project
     author  = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
@@ -30,7 +30,7 @@ class NotificationHook < Redmine::Hook::Listener
 
   def controller_wiki_edit_after_save(context={})
     page    = context[:page]
-    return true unless Setting.plugin_hipchat[:projects].include?(page.wiki.project_id.to_s)
+    return true unless Setting.plugin_redmine_hipchat[:projects].include?(page.wiki.project_id.to_s)
     author  = CGI::escapeHTML(User.current.name)
     wiki    = CGI::escapeHTML(page.pretty_title)
     project = CGI::escapeHTML(page.wiki.project.name)
@@ -47,22 +47,22 @@ private
       when Issue    then "#{Setting[:protocol]}://#{Setting[:host_name]}/issues/#{object.id}"
       when WikiPage then "#{Setting[:protocol]}://#{Setting[:host_name]}/projects/#{object.wiki.project.identifier}/wiki/#{object.title}"
     else
-      RAILS_DEFAULT_LOGGER.info "Asked redmine_hipchat for the url of an unsupported object #{object.inspect}"
+      Rails.logger.info "Asked redmine_hipchat for the url of an unsupported object #{object.inspect}"
     end
   end
 
   def send_message(message)
-    if Setting.plugin_hipchat[:auth_token].empty? || Setting.plugin_hipchat[:room_id].empty?
-      RAILS_DEFAULT_LOGGER.info "Not sending HipChat message - missing config"
+    if Setting.plugin_redmine_hipchat[:auth_token].empty? || Setting.plugin_redmine_hipchat[:room_id].empty?
+      Rails.logger.info "Not sending HipChat message - missing config"
       return
     end
 
-    RAILS_DEFAULT_LOGGER.info "Sending message to HipChat: #{message}"
+    Rails.logger.info "Sending message to HipChat: #{message}"
     req = Net::HTTP::Post.new("/v1/rooms/message")
     req.set_form_data({
-      :auth_token => Setting.plugin_hipchat[:auth_token],
-      :room_id => Setting.plugin_hipchat[:room_id],
-      :notify => Setting.plugin_hipchat[:notify] ? 1 : 0,
+      :auth_token => Setting.plugin_redmine_hipchat[:auth_token],
+      :room_id => Setting.plugin_redmine_hipchat[:room_id],
+      :notify => Setting.plugin_redmine_hipchat[:notify] ? 1 : 0,
       :from => 'Redmine',
       :message => message
     })
@@ -76,7 +76,7 @@ private
         connection.request(req)
       end
     rescue Net::HTTPBadResponse => e
-      RAILS_DEFAULT_LOGGER.error "Error hitting HipChat API: #{e}"
+      Rails.logger.error "Error hitting HipChat API: #{e}"
     end
   end
 
