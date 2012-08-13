@@ -1,17 +1,18 @@
-require 'redmine'
-
-require_dependency 'hipchat_hooks'
-
-Redmine::Plugin.register :hipchat do
+Redmine::Plugin.register :redmine_hipchat do
   name 'HipChat'
   author 'HipChat, Inc.'
   description 'Sends notifications to a HipChat room.'
-  version '1.0.0'
+  version '2.0.0'
   url 'https://github.com/hipchat/redmine_hipchat'
+  author_url 'https://www.hipchat.com/'
 
-  settings :default => {
-                         :room_id => "",
-                         :auth_token => "",
-                       },
-           :partial => 'hipchat/settings'
+  Rails.configuration.to_prepare do
+    require_dependency 'hipchat_hooks'
+  end
+
+  settings :partial => 'settings/redmine_hipchat',
+    :default => {
+      :room_id => "",
+      :auth_token => "",
+    }
 end
