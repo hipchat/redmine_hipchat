@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class NotificationHook < Redmine::Hook::Listener
 
   def controller_issues_new_after_save(context={})
