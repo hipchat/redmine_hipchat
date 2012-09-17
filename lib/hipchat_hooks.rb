@@ -2,47 +2,98 @@
 
 class NotificationHook < Redmine::Hook::Listener
 
-  def controller_issues_new_after_save(context={})
+  def controller_issues_new_after_save(context = {})
     issue   = context[:issue]
-    return true unless Setting.plugin_redmine_hipchat[:projects].include?(issue.project_id.to_s)
     project = issue.project
+    return true if !hipchat_configured?(project)
+
     author  = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
     subject = CGI::escapeHTML(issue.subject)
-    url     = get_url issue
+    url     = get_url(issue)
     text    = "#{author} reported #{project.name} #{tracker} <a href=\"#{url}\">##{issue.id}</a>: #{subject}"
 
-    send_message text
+    data          = {}
+    data[:text]   = text
+    data[:token]  = hipchat_auth_token(project)
+    data[:room]   = hipchat_room_name(project)
+    data[:notify] = hipchat_notify(project)
+
+    send_message(data)
   end
 
-  def controller_issues_edit_after_save(context={})
+  def controller_issues_edit_after_save(context = {})
     issue   = context[:issue]
-    return true unless Setting.plugin_redmine_hipchat[:projects].include?(issue.project_id.to_s)
     project = issue.project
+    return true if !hipchat_configured?(project)
+
     author  = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
     subject = CGI::escapeHTML(issue.subject)
     comment = CGI::escapeHTML(context[:journal].notes)
-    url     = get_url issue
+    url     = get_url(issue)
     text    = "#{author} updated #{project.name} #{tracker} <a href=\"#{url}\">##{issue.id}</a>: #{subject}"
     text   += ": <i>#{truncate(comment)}</i>" unless comment.blank?
 
-    send_message text
+    data          = {}
+    data[:text]   = text
+    data[:token]  = hipchat_auth_token(project)
+    data[:room]   = hipchat_room_name(project)
+    data[:notify] = hipchat_notify(project)
+
+    send_message(data)
   end
 
-  def controller_wiki_edit_after_save(context={})
+  def controller_wiki_edit_after_save(context = {})
     page    = context[:page]
-    return true unless Setting.plugin_redmine_hipchat[:projects].include?(page.wiki.project_id.to_s)
-    author  = CGI::escapeHTML(User.current.name)
-    wiki    = CGI::escapeHTML(page.pretty_title)
-    project = CGI::escapeHTML(page.wiki.project.name)
-    url     = get_url page
-    text    = "#{author} edited #{project} wiki page <a href=\"#{url}\">#{wiki}</a>"
+    project = page.wiki.project
+    return true if !hipchat_configured?(project)
 
-    send_message text
+    author       = CGI::escapeHTML(User.current.name)
+    wiki         = CGI::escapeHTML(page.pretty_title)
+    project_name = CGI::escapeHTML(project.name)
+    url          = get_url(page)
+    text         = "#{author} edited #{project_name} wiki page <a href=\"#{url}\">#{wiki}</a>"
+
+    data          = {}
+    data[:text]   = text
+    data[:token]  = hipchat_auth_token(project)
+    data[:room]   = hipchat_room_name(project)
+    data[:notify] = hipchat_notify(project)
+
+    send_message(data)
   end
 
-private
+  private
+
+  def hipchat_configured?(project)
+    if !project.hipchat_auth_token.empty? && !project.hipchat_room_name.empty?
+      return true
+    elsif Setting.plugin_redmine_hipchat[:projects] &&
+          Setting.plugin_redmine_hipchat[:projects].include?(project.id.to_s) &&
+          Setting.plugin_redmine_hipchat[:auth_token] &&
+          Setting.plugin_redmine_hipchat[:room_id]
+      return true
+    else
+      Rails.logger.info "Not sending HipChat message - missing config"
+    end
+    false
+  end
+
+  def hipchat_auth_token(project)
+    return project.hipchat_auth_token if !project.hipchat_auth_token.empty?
+    return Setting.plugin_redmine_hipchat[:auth_token]
+  end
+
+  def hipchat_room_name(project)
+    return project.hipchat_room_name if !project.hipchat_room_name.empty?
+    return Setting.plugin_redmine_hipchat[:room_id]
+  end
+
+  def hipchat_notify(project)
+    return project.hipchat_notify if !project.hipchat_auth_token.empty? && !project.hipchat_room_name.empty?
+    Setting.plugin_redmine_hipchat[:notify]
+  end
 
   def get_url(object)
     case object
@@ -53,20 +104,15 @@ private
     end
   end
 
-  def send_message(message)
-    if Setting.plugin_redmine_hipchat[:auth_token].empty? || Setting.plugin_redmine_hipchat[:room_id].empty?
-      Rails.logger.info "Not sending HipChat message - missing config"
-      return
-    end
-
-    Rails.logger.info "Sending message to HipChat: #{message}"
+  def send_message(data)
+    Rails.logger.info "Sending message to HipChat: #{data[:text]}"
     req = Net::HTTP::Post.new("/v1/rooms/message")
     req.set_form_data({
-      :auth_token => Setting.plugin_redmine_hipchat[:auth_token],
-      :room_id => Setting.plugin_redmine_hipchat[:room_id],
-      :notify => Setting.plugin_redmine_hipchat[:notify] ? 1 : 0,
+      :auth_token => data[:token],
+      :room_id => data[:room],
+      :notify => data[:notify] ? 1 : 0,
       :from => 'Redmine',
-      :message => message
+      :message => data[:text]
     })
     req["Content-Type"] = 'application/x-www-form-urlencoded'
 
@@ -87,5 +133,4 @@ private
     words = text.split()
     words[0..(length-1)].join(' ') + (words.length > length ? end_string : '')
   end
-
 end

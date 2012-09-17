@@ -4,3 +4,6 @@ en:
   hipchat_settings_label_auth_token: Room token
   hipchat_settings_label_notify: Notify
   hipchat_settings_label_projects: Projects
+  field_hipchat_auth_token: HipChat Room token
+  field_hipchat_room_name: HipChat Room ID
+  field_hipchat_notify: HipChat notify
