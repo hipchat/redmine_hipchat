@@ -1,11 +1,11 @@
 <p>
   <%= form.text_field :hipchat_auth_token %>
-  A token from <a href="https://www.hipchat.com/group_admin/api" target="_blank">your API tokens page</a>. Leave empty for use global settings.
+  A token from <a href="https://www.hipchat.com/group_admin/api" target="_blank">your API tokens page</a>. Leave empty to use <%= link_to 'global settings', plugin_settings_path(:redmine_hipchat) %>.
 </p>
 
 <p>
   <%= form.text_field :hipchat_room_name %>
-  Target room's ID or name. Leave empty for use global settings.
+  Target room's ID or name. Leave empty to use <%= link_to 'global settings', plugin_settings_path(:redmine_hipchat) %>.
 </p>
 
 <p>
