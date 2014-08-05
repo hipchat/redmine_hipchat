@@ -24,7 +24,7 @@
 
 <p>
   <%= content_tag(:label, l(:hipchat_settings_label_trackers)) %>
-  <%= select_tag 'settings[trackers][]', options_for_select(Tracker.all.collect {|tracker| [ tracker.name, tracker.id ]}), :selected => @settings[:trackers], :multiple => true, :size => Tracker.all.size %>
+  <%= select_tag 'settings[trackers][]', options_for_select(Tracker.all.collect {|tracker| [ tracker.name, tracker.id ]}, :selected => @settings[:trackers]), :multiple => true, :size => Tracker.all.size %>
 </p>
 
 <p>
