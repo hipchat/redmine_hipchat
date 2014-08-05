@@ -6,6 +6,7 @@ class NotificationHook < Redmine::Hook::Listener
     issue   = context[:issue]
     project = issue.project
     return true if !hipchat_configured?(project)
+    return true if !Setting.plugin_redmine_hipchat[:trackers].include?(issue.tracker.id.to_s)
 
     author  = CGI::escapeHTML(User.current.name)
     tracker = CGI::escapeHTML(issue.tracker.name.downcase)
@@ -23,6 +24,7 @@ class NotificationHook < Redmine::Hook::Listener
   end
 
   def controller_issues_edit_after_save(context = {})
+    return true if !Setting.plugin_redmine_hipchat[:notify_on_update]
     issue   = context[:issue]
     project = issue.project
     return true if !hipchat_configured?(project)
