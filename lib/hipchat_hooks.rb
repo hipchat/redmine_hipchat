@@ -105,7 +105,7 @@ class NotificationHook < Redmine::Hook::Listener
   end
 
   def send_message(data)
-    Rails.logger.info "Sending message to HipChat: #{data[:text]}"
+    Rails.logger.info "Sending message to HipChat room '#{data[:room]}': #{data[:text]}"
     req = Net::HTTP::Post.new("/v1/rooms/message")
     req.set_form_data({
       :auth_token => data[:token],
@@ -121,7 +121,10 @@ class NotificationHook < Redmine::Hook::Listener
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     begin
       http.start do |connection|
-        connection.request(req)
+        res = connection.request(req)
+        if res.code != '200'
+          Rails.logger.error "Failed to send message to HipChat: #{res.code} #{res.msg} (room: #{data[:room]})"
+        end
       end
     rescue Net::HTTPBadResponse => e
       Rails.logger.error "Error hitting HipChat API: #{e}"
