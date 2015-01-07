@@ -17,6 +17,6 @@ Redmine::Plugin.register :redmine_hipchat do
     :default => {
       :room_name => "",
       :auth_token => "",
-		:endpoint => ""
+      :endpoint => ""
     }
 end
