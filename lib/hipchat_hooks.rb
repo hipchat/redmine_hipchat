@@ -78,7 +78,7 @@ class NotificationHook < Redmine::Hook::Listener
           Setting.plugin_redmine_hipchat[:projects].include?(project.id.to_s) &&
           Setting.plugin_redmine_hipchat[:auth_token] &&
           Setting.plugin_redmine_hipchat[:room_name] &&
-			 Setting.plugin_redmine_hipchat[:endpoint]
+	  Setting.plugin_redmine_hipchat[:endpoint]
       return true
     else
       Rails.logger.info "Not sending HipChat message - missing config"
