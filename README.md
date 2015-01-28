@@ -1,5 +1,6 @@
 HipChat Plugin for Redmine
 ==========================
+Supports HipChat Server and HipChat API V2
 
 This plugin sends messages to your HipChat room when issues are created or updated.
 
