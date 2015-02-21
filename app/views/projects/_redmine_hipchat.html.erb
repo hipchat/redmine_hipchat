@@ -9,6 +9,11 @@
 </p>
 
 <p>
+  <%= form.text_field :hipchat_endpoint %>
+  Using Hipchat server? Leave empty to use <%= link_to 'global settings', plugin_settings_path(:redmine_hipchat) %>.
+</p>
+
+<p>
   <%= form.check_box :hipchat_notify %>
   Notify room members? Will trigger sound/popup based on user preferences.
 </p>

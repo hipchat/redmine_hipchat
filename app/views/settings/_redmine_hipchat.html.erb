@@ -5,9 +5,15 @@
 </p>
 
 <p>
-  <%= content_tag(:label, l(:hipchat_settings_label_room_id)) %>
-  <%= text_field_tag 'settings[room_id]', @settings[:room_id] %>
+  <%= content_tag(:label, l(:hipchat_settings_label_room_name)) %>
+  <%= text_field_tag 'settings[room_name]', @settings[:room_name] %>
   Target room's ID or name.
+</p>
+
+<p>
+  <%= content_tag(:label, l(:hipchat_settings_label_endpoint)) %>
+  <%= text_field_tag 'settings[endpoint]', @settings[:endpoint] %>
+  Using Hipchat server? Put it here. If you leave this empty it will default to api.hipchat.com.
 </p>
 
 <p>
