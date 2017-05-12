@@ -9,7 +9,7 @@ Redmine::Plugin.register :redmine_hipchat do
   Rails.configuration.to_prepare do
     require_dependency 'hipchat_hooks'
     require_dependency 'hipchat_view_hooks'
-    require_dependency 'project_patch'
+    require_dependency 'hipchat_project_patch'
     Project.send(:include, RedmineHipchat::Patches::ProjectPatch)
   end
 
